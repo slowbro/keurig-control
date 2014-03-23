@@ -9,11 +9,13 @@ import time
 from pygame.locals import *
 from subprocess import call  
 
+# fb/ts setup
 os.putenv('SDL_VIDEODRIVER', 'fbcon')
 os.putenv('SDL_FBDEV'      , '/dev/fb1')
 os.putenv('SDL_MOUSEDRV'   , 'TSLIB')
 os.putenv('SDL_MOUSEDEV'   , '/dev/input/touchscreen')
 
+# classes
 class Icon:
 
     def __init__(self, name):
@@ -58,9 +60,7 @@ class Button:
       if self.color:
         screen.fill(self.color, self.rect)
       if self.iconBg:
-        screen.blit(self.iconBg.bitmap,
-          (self.rect[0]+(self.rect[2]-self.iconBg.bitmap.get_width())/2,
-           self.rect[1]+(self.rect[3]-self.iconBg.bitmap.get_height())/2))
+        screen.blit(self.iconBg.bitmap, (self.rect[0], self.rect[1]))
       if self.iconFg:
         screen.blit(self.iconFg.bitmap,
           (self.rect[0]+(self.rect[2]-self.iconFg.bitmap.get_width())/2,
@@ -76,24 +76,78 @@ class Button:
             break
 
 
+# globals
+iconPath = 'icons'
+temp = 192
+user = None
+icons = []
 
+
+# init
 pygame.init()
 pygame.mouse.set_visible(False)
 screen = pygame.display.set_mode((0,0), pygame.FULLSCREEN)
 screen.fill((255,255,255))
 
+print pygame.display.Info()
 
-# bitmap = pygame.image.load("/root/quit-ok.png")
-# screen.blit(bitmap, (110, 60,100,120))
+temp_font = pygame.font.SysFont('Monospace', 16)
+welcome_font = pygame.font.SysFont('Monospace', 12)
+buttons = [
+    # screen mode 0 - login page
+    [],
 
-font = pygame.font.Font(None, 16)
+    # screen mode 1 - main menu
+    [
+     Button((295,  0,315, 30), bg='check'               ),
+     Button((  0, 80, 18,160), bg='slide-left-disabled' ),
+     Button((302, 80,320,160), bg='slide-right'         ),
+     Button(( 10,200, 24,214), bg='btn-minus'           ),
+     Button(( 80,200, 94,214), bg='btn-plus'            ),
+     Button(( 24, 80, 89,160), bg='size-7oz'            ),
+     Button(( 93, 80,158,160), bg='size-7oz-selected'   ),
+     Button((162, 80,227,160), bg='size-7oz'            ),
+     Button((231, 80,296,160), bg='size-7oz'            ),
+     Button((190,190,310,230), bg='logout'              ),
+    ],
 
+    # screen mode 2 - working
+    [],
+
+    # screen mode 3 - standby mode
+    [],
+]
+
+for file in os.listdir(iconPath):
+  if fnmatch.fnmatch(file, '*.png'):
+    icons.append(Icon(file.split('.')[0]))
+
+# Assign Icons to Buttons, now that they're loaded
+for s in buttons:        # For each screenful of buttons...
+  for b in s:            #  For each button on screen...
+    for i in icons:      #   For each icon...
+      if b.bg == i.name: #    Compare names; match?
+        b.iconBg = i     #     Assign Icon to Button
+        b.bg     = None  #     Name no longer used; allow garbage collection
+      if b.fg == i.name:
+        b.iconFg = i
+        b.fg     = None
+
+screenMode=1
 while(True):
     for event in pygame.event.get():
         if(event.type is MOUSEBUTTONDOWN):
             pos = str(pygame.mouse.get_pos())
             screen.fill((255,255,255))
-            text = font.render(pos, 1, (10,10,10))
+            text = temp_font.render(pos, 1, (10,10,10))
             screen.blit(text, (2,2))
             break
+    for i,b in enumerate(buttons[screenMode]):
+       b.draw(screen)
+    welcome = welcome_font.render('Welcome, Katelyn!', 0, (0,0,0))
+    screen.blit(welcome, (5,5))
+    temp_txt = temp_font.render(str(temp)+'F', 0, (0,0,0))
+    screen.blit(temp_txt, (32,198))
     pygame.display.flip()
+#    pygame.image.save(screen, "main.jpg")
+#    exit()
