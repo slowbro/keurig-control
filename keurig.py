@@ -67,54 +67,58 @@ class Text:
 
 class Button:
     def __init__(self, rect, **kwargs):
-      self.rect     = rect # Bounds
-      self.color    = None # Background fill color, if any
-      self.iconBg   = None # Background Icon (atop color fill)
-      self.iconFg   = None # Foreground Icon (atop background)
-      self.bg       = None # Background Icon name
-      self.fg       = None # Foreground Icon name
-      self.callback = None # Callback function
-      self.value    = None # Value passed to callback
-      for key, value in kwargs.iteritems():
-        if   key == 'color': self.color    = value
-        elif key == 'bg'   : self.bg       = value
-        elif key == 'fg'   : self.fg       = value
-        elif key == 'cb'   : self.callback = value
-        elif key == 'value': self.value    = value
+        self.rect       = rect # Bounds
+        self.color      = None # Background fill color, if any
+        self.iconBg     = None # Background Icon (atop color fill)
+        self.iconFg     = None # Foreground Icon (atop background)
+        self.bg         = None # Background Icon name
+        self.fg         = None # Foreground Icon name
+        self.callback   = None # Callback function
+        self.value      = None # Value passed to callback
+        self.selectable = True
+        for key, value in kwargs.iteritems():
+            if   key == 'color'     : self.color      = value
+            elif key == 'bg'        : self.bg         = value
+            elif key == 'fg'        : self.fg         = value
+            elif key == 'cb'        : self.callback   = value
+            elif key == 'value'     : self.value      = value
+            elif key == 'selectable': self.selectable = value
 
     def selected(self, pos):
-      x1 = self.rect[0]
-      y1 = self.rect[1]
-      x2 = self.rect[2]
-      y2 = self.rect[3]
-      if ((pos[0] >= x1) and (pos[0] <= x2) and
-          (pos[1] >= y1) and (pos[1] <= y2)):
-        if self.callback:
-          if self.value is None: self.callback()
-          else:                  self.callback(self.value)
-        return True
-      return False
+        if(self.selectable == False):
+            return False
+        x1 = self.rect[0]
+        y1 = self.rect[1]
+        x2 = self.rect[2]
+        y2 = self.rect[3]
+        if ((pos[0] >= x1) and (pos[0] <= x2) and
+            (pos[1] >= y1) and (pos[1] <= y2)):
+            if self.callback:
+                if self.value is None: self.callback()
+                else:                  self.callback(self.value)
+            return True
+        return False
 
     def draw(self, screen):
-      if self.color:
-        screen.fill(self.color, self.rect)
-      if self.iconBg:
-        screen.blit(self.iconBg.bitmap, (self.rect[0], self.rect[1]))
-      if self.iconFg:
-        screen.blit(self.iconFg.bitmap,
-          (self.rect[0]+(self.rect[2]-self.iconFg.bitmap.get_width())/2,
-           self.rect[1]+(self.rect[3]-self.iconFg.bitmap.get_height())/2))
-      elif isinstance(self.fg, Text):
-        screen.blit(self.fg.getRenderedSurface(), (self.rect[0], self.rect[1]))
+        if self.color:
+            screen.fill(self.color, self.rect)
+        if self.iconBg:
+            screen.blit(self.iconBg.bitmap, (self.rect[0], self.rect[1]))
+        if self.iconFg:
+            screen.blit(self.iconFg.bitmap,
+                (self.rect[0]+(self.rect[2]-self.iconFg.bitmap.get_width())/2,
+                self.rect[1]+(self.rect[3]-self.iconFg.bitmap.get_height())/2))
+        elif isinstance(self.fg, Text):
+            screen.blit(self.fg.getRenderedSurface(), (self.rect[0], self.rect[1]))
 
     def setBg(self, name):
-      if name is None:
-        self.iconBg = None
-      else:
-        for i in icons:
-          if name == i.name:
-            self.iconBg = i
-            break
+        if name is None:
+            self.iconBg = None
+        else:
+            for i in icons:
+                if name == i.name:
+                    self.iconBg = i
+                    break
 
 
 # globals
@@ -138,16 +142,17 @@ buttons = [
 
     # screen mode 1 - main menu
     [
-     Button((295,  0,315, 30), bg='check'               ),
-     Button((  0, 80, 18,160), bg='slide-left-disabled' ),
-     Button((302, 80,320,160), bg='slide-right'         ),
-     Button(( 10,200, 24,214), bg='btn-minus', cb=changeTemp, value=0 ),
-     Button(( 80,200, 94,214), bg='btn-plus',  cb=changeTemp, value=1 ),
-     Button(( 24, 80, 89,160), bg='size-frame',          fg=Text((65,80), (-1,6), size_font, "3") ),
-     Button(( 93, 80,158,160), bg='size-frame-selected', fg=Text((65,80), (-1,6), size_font, "7") ),
+     Button((295,  0,315, 30), bg='check', selectable=False ),
+     Button((  0, 80, 18,160), bg='slide-left-disabled'     ),
+     Button((302, 80,320,160), bg='slide-right'             ),
+     Button(( 10,200,110,220), fg=Text((100,20), (0,0), temp_font, "Boil Temp:"), selectable=False),
+     Button(( 16,220, 30,234), bg='btn-minus', cb=changeTemp, value=0  ),
+     Button(( 86,220, 100,234), bg='btn-plus',  cb=changeTemp, value=1 ),
+     Button(( 24, 80, 89,160), bg='size-frame',          fg=Text((65,80), (-1,6), size_font, "3")  ),
+     Button(( 93, 80,158,160), bg='size-frame-selected', fg=Text((65,80), (-1,6), size_font, "7")  ),
      Button((162, 80,227,160), bg='size-frame',          fg=Text((65,80), (-1,6), size_font, "12") ),
      Button((231, 80,296,160), bg='size-frame',          fg=Text((65,80), (-1,6), size_font, "16") ),
-     Button((198,198,318,238), bg='brew-ok', cb=exit     ),
+     Button((198,198,318,238), bg='brew-ok', cb=exit        ),
     ],
 
     # screen mode 2 - working
@@ -186,7 +191,7 @@ while(True):
     welcome = welcome_font.render('Welcome, Katelyn!', 0, (0,0,0))
     screen.blit(welcome, (5,5))
     temp_txt = temp_font.render(str(temp)+'F', 0, (0,0,0))
-    screen.blit(temp_txt, (32,198))
+    screen.blit(temp_txt, (38,218))
     pygame.display.flip()
     if ( len(sys.argv) > 1 and sys.argv[1] == "screen" ):
         print("taking screen capture")
