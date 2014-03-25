@@ -43,9 +43,8 @@ class Icon:
 #  textpos (X,Y), X=-1 for centered
 #  font    pygame.[Sys]Font
 #  text    string
+#  color   (R,G,B); default (0,0,0)
 # getRenderedSurface:
-#  antialias int(0,1)
-#  color     (R,G,B)
 #  returns: pygame.Surface
 
 class Text:
@@ -62,6 +61,7 @@ class Text:
             self.textposx = (size[0]-self.textsz[0])/2
         rtext = self.font.render(self.text, 1, self.color)
         self.surface.blit(rtext, (self.textposx, self.textposy))
+        self.font = None
 
     def getRenderedSurface(self):
         return self.surface
@@ -149,7 +149,7 @@ buttons = [
      Button(( 93, 80,158,160), bg='size-frame-selected', fg=Text((65,80), (-1,6), size_font, "7") ),
      Button((162, 80,227,160), bg='size-frame',          fg=Text((65,80), (-1,6), size_font, "12") ),
      Button((231, 80,296,160), bg='size-frame',          fg=Text((65,80), (-1,6), size_font, "16") ),
-     Button((190,190,310,230), bg='logout', cb=exit     ),
+     Button((190,190,310,230), bg='brew-ok', cb=exit     ),
     ],
 
     # screen mode 2 - working
@@ -190,7 +190,7 @@ while(True):
     temp_txt = temp_font.render(str(temp)+'F', 0, (0,0,0))
     screen.blit(temp_txt, (32,198))
     pygame.display.flip()
-    if (sys.argv[1] == "screen"):
+    if ( len(sys.argv) > 1 and sys.argv[1] == "screen" ):
         print("taking screen capture")
         pygame.image.save(screen, "keurig-screen.jpg")
         exit()
