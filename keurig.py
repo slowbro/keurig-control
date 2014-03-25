@@ -4,6 +4,7 @@ import io
 import os
 import pygame
 import stat
+import sys
 import threading
 import time
 from pygame.locals import *
@@ -133,8 +134,6 @@ def changeTemp(updn):
     elif(updn == 1):
         temp += 1
 
-print pygame.display.Info()
-
 buttons = [
     # screen mode 0 - login page
     [],
@@ -191,5 +190,7 @@ while(True):
     temp_txt = temp_font.render(str(temp)+'F', 0, (0,0,0))
     screen.blit(temp_txt, (32,198))
     pygame.display.flip()
-#    pygame.image.save(screen, "main.jpg")
-#    exit()
+    if (sys.argv[1] == "screen"):
+        print("taking screen capture")
+        pygame.image.save(screen, "keurig-screen.jpg")
+        exit()
