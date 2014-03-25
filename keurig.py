@@ -59,7 +59,7 @@ class Text:
         self.textsz  = self.font.size(text)
         if (self.textposx == -1):
             self.textposx = (size[0]-self.textsz[0])/2
-        rtext = self.font.render(self.text, False, self.color)
+        rtext = self.font.render(self.text, 1, self.color)
         self.surface.blit(rtext, (self.textposx, self.textposy))
 
     def getRenderedSurface(self):
