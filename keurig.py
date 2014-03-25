@@ -15,6 +15,17 @@ os.putenv('SDL_FBDEV'      , '/dev/fb1')
 os.putenv('SDL_MOUSEDRV'   , 'TSLIB')
 os.putenv('SDL_MOUSEDEV'   , '/dev/input/touchscreen')
 
+# init
+pygame.init()
+pygame.mouse.set_visible(False)
+screen = pygame.display.set_mode((0,0), pygame.FULLSCREEN)
+screen.fill((255,255,255))
+
+# fonts
+temp_font = pygame.font.SysFont('Monospace', 16)
+welcome_font = pygame.font.SysFont('Monospace', 12)
+size_font = pygame.font.SysFont('Monospace', 36)
+
 # classes
 class Icon:
 
@@ -24,6 +35,35 @@ class Icon:
         self.bitmap = pygame.image.load(iconPath + '/' + name + '.png')
       except:
         pass
+
+# Text Class
+# __init__:
+#  size    (W,H)
+#  textpos (X,Y), X=-1 for centered
+#  font    pygame.[Sys]Font
+#  text    string
+# getRenderedSurface:
+#  antialias int(0,1)
+#  color     (R,G,B)
+#  returns: pygame.Surface
+
+class Text:
+    def __init__(self, size, textpos, font, text, color=(0,0,0)):
+        self.size    = size
+        self.textposx= textpos[0]
+        self.textposy= textpos[1]
+        self.font    = font
+        self.text    = text
+        self.color   = color
+        self.surface = pygame.Surface(size, pygame.SRCALPHA, 32)
+        self.textsz  = self.font.size(text)
+        if (self.textposx == -1):
+            self.textposx = (size[0]-self.textsz[0])/2
+        rtext = self.font.render(self.text, False, self.color)
+        self.surface.blit(rtext, (self.textposx, self.textposy))
+
+    def getRenderedSurface(self):
+        return self.surface
 
 class Button:
 
@@ -46,8 +86,8 @@ class Button:
     def selected(self, pos):
       x1 = self.rect[0]
       y1 = self.rect[1]
-      x2 = x1 + self.rect[2] - 1
-      y2 = y1 + self.rect[3] - 1
+      x2 = self.rect[2]
+      y2 = self.rect[3]
       if ((pos[0] >= x1) and (pos[0] <= x2) and
           (pos[1] >= y1) and (pos[1] <= y2)):
         if self.callback:
@@ -65,6 +105,8 @@ class Button:
         screen.blit(self.iconFg.bitmap,
           (self.rect[0]+(self.rect[2]-self.iconFg.bitmap.get_width())/2,
            self.rect[1]+(self.rect[3]-self.iconFg.bitmap.get_height())/2))
+      elif isinstance(self.fg, Text):
+        screen.blit(self.fg.getRenderedSurface(), (self.rect[0], self.rect[1]))
 
     def setBg(self, name):
       if name is None:
@@ -82,17 +124,17 @@ temp = 192
 user = None
 icons = []
 
+# callbacks
 
-# init
-pygame.init()
-pygame.mouse.set_visible(False)
-screen = pygame.display.set_mode((0,0), pygame.FULLSCREEN)
-screen.fill((255,255,255))
+def changeTemp(updn):
+    global temp
+    if(updn == 0):
+        temp -= 1
+    elif(updn == 1):
+        temp += 1
 
 print pygame.display.Info()
 
-temp_font = pygame.font.SysFont('Monospace', 16)
-welcome_font = pygame.font.SysFont('Monospace', 12)
 buttons = [
     # screen mode 0 - login page
     [],
@@ -102,13 +144,13 @@ buttons = [
      Button((295,  0,315, 30), bg='check'               ),
      Button((  0, 80, 18,160), bg='slide-left-disabled' ),
      Button((302, 80,320,160), bg='slide-right'         ),
-     Button(( 10,200, 24,214), bg='btn-minus'           ),
-     Button(( 80,200, 94,214), bg='btn-plus'            ),
-     Button(( 24, 80, 89,160), bg='size-7oz'            ),
-     Button(( 93, 80,158,160), bg='size-7oz-selected'   ),
-     Button((162, 80,227,160), bg='size-7oz'            ),
-     Button((231, 80,296,160), bg='size-7oz'            ),
-     Button((190,190,310,230), bg='logout'              ),
+     Button(( 10,200, 24,214), bg='btn-minus', cb=changeTemp, value=0 ),
+     Button(( 80,200, 94,214), bg='btn-plus',  cb=changeTemp, value=1 ),
+     Button(( 24, 80, 89,160), bg='size-frame',          fg=Text((65,80), (-1,6), size_font, "3") ),
+     Button(( 93, 80,158,160), bg='size-frame-selected', fg=Text((65,80), (-1,6), size_font, "7") ),
+     Button((162, 80,227,160), bg='size-frame',          fg=Text((65,80), (-1,6), size_font, "12") ),
+     Button((231, 80,296,160), bg='size-frame',          fg=Text((65,80), (-1,6), size_font, "16") ),
+     Button((190,190,310,230), bg='logout', cb=exit     ),
     ],
 
     # screen mode 2 - working
@@ -128,7 +170,7 @@ for s in buttons:        # For each screenful of buttons...
     for i in icons:      #   For each icon...
       if b.bg == i.name: #    Compare names; match?
         b.iconBg = i     #     Assign Icon to Button
-        b.bg     = None  #     Name no longer used; allow garbage collection
+#        b.bg     = None  #     Name no longer used; allow garbage collection
       if b.fg == i.name:
         b.iconFg = i
         b.fg     = None
@@ -137,11 +179,11 @@ screenMode=1
 while(True):
     for event in pygame.event.get():
         if(event.type is MOUSEBUTTONDOWN):
-            pos = str(pygame.mouse.get_pos())
-            screen.fill((255,255,255))
-            text = temp_font.render(pos, 1, (10,10,10))
-            screen.blit(text, (2,2))
-            break
+            pos = pygame.mouse.get_pos()
+            for b in buttons[screenMode]:
+                if b.selected(pos): print("selected button: "+b.bg)
+
+    screen.fill((255,255,255))
     for i,b in enumerate(buttons[screenMode]):
        b.draw(screen)
     welcome = welcome_font.render('Welcome, Katelyn!', 0, (0,0,0))
