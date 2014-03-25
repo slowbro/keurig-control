@@ -1,7 +1,7 @@
 keurig-control
 ==============
 
-[CHANGELOG HERE](../blob/master/CHANGELOG.md)
+[CHANGELOG HERE](CHANGELOG.md)
 
 Keurig controller in Python, for Raspberry Pi with a PiTFT
 
