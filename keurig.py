@@ -29,7 +29,6 @@ size_font = pygame.font.SysFont('Monospace', 36)
 
 # classes
 class Icon:
-
     def __init__(self, name):
       self.name = name
       try:
@@ -67,7 +66,6 @@ class Text:
         return self.surface
 
 class Button:
-
     def __init__(self, rect, **kwargs):
       self.rect     = rect # Bounds
       self.color    = None # Background fill color, if any
@@ -149,7 +147,7 @@ buttons = [
      Button(( 93, 80,158,160), bg='size-frame-selected', fg=Text((65,80), (-1,6), size_font, "7") ),
      Button((162, 80,227,160), bg='size-frame',          fg=Text((65,80), (-1,6), size_font, "12") ),
      Button((231, 80,296,160), bg='size-frame',          fg=Text((65,80), (-1,6), size_font, "16") ),
-     Button((190,190,310,230), bg='brew-ok', cb=exit     ),
+     Button((198,198,318,238), bg='brew-ok', cb=exit     ),
     ],
 
     # screen mode 2 - working
